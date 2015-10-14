@@ -82,22 +82,47 @@ bool j1Map::Load(const char* file_name)
 		map.width = map_file.child("map").find_attribute("width").as_int();
 		map.tileWidth = map_file.child("map").find_attribute("tileWidth").as_int();
 		map.tileHeigth = map_file.child("map").find_attribute("tileHeight").as_int();
-		map.nextObjectId = map_file.child("map").find_attribute("orientation").as_string();
-		map.Offset = map_file.child("map").find_attribute("width").as_int();
+		map.nextObjectId = map_file.child("map").find_attribute("nextObjectId").as_int();
+		
 
 
-		if (map_file.child("map").find_attribute("orientation").as_string() == 'ORTHOGONAL')
+		if (map_file.child("map").find_attribute("orientation").as_string() == "ORTHOGONAL")
 		{
-			map.orient = 0;
+			map.orient = ORTHOGONAL;
 		}
 		
-		map.orient = map_file.child("map").find_attribute("orientation").as_string();
-		map.render = map_file.child("map").find_attribute("width").as_int;
+		if (map_file.child("map").find_attribute("orientation").as_string() == "right-down")
+		{
+			map.render = RIGHTDOWN;
+		}
+		 
 	}
 
 	// TODO 4: Create and call a private function to load a tileset
 	// remember to support more any number of tilesets!
+
+	map.tiles.firstGid = map_file.child("map").child("tileset").attribute("firstgid").as_int();
+	map.tiles.margin = map_file.child("map").child("tileset").attribute("margin").as_int();
+	map.tiles.spacing = map_file.child("map").child("tileset").attribute("spacing").as_int();
+	map.tiles.tileHeight = map_file.child("map").child("tileset").attribute("tileheight").as_int();
+	map.tiles.tileWidth = map_file.child("map").child("tileset").attribute("tilewidth").as_int();
+
 	
+
+	for (pugi::xml_node nTMP = map_file.child("map").child("tileset").child("tile"); nTMP ; nTMP = nTMP.next_sibling("tile"))
+	{
+	
+		map.tiles.tileGrid.PushBack(nTMP.attribute("id").as_int());
+	
+	}
+
+
+	map.tiles.tileGrid.Count();
+
+
+
+
+
 
 	// TODO 5: LOG all the data loaded
 	// iterate all tilesets and LOG everything

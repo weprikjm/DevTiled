@@ -30,6 +30,8 @@ struct tileOffset
 {
 	int x;
 	int y;
+
+	tileOffset() :x(0), y(0){}
 };
 
 
@@ -48,20 +50,15 @@ struct MapNode
 	orientation orient;
 
 	TileSet tiles;
-
-	MapNode()
+	/*
+	MapNode() : width(0), height(0), tileWidth(0), tileHeigth(0), nextObjectId(0), 
+				render(RIGHTDOWN), orient(ORTHOGONAL)
 	{
-		width = 0;
-		height = 0;
-		tileWidth = 0;
-		tileHeigth = 0;
-		nextObjectId = 0;
-
+	
 		Offset.x = 0;
 		Offset.y = 0;
-		render = RIGHTDOWN;
-		orient = ORTHOGONAL;
 	}
+	*/
 };
 
 
@@ -75,14 +72,8 @@ struct TileSet
 
 	p2DynArray<int> tileGrid;
 
-	TileSet()
-	{
-		firstGid = 0;
-		tileWidth = 0;
-		tileHeight = 0;
-		spacing = 0;
-		margin = 0;
-	}
+	//TileSet() : firstGid(0), tileWidth(0), tileHeight(0), spacing(0), margin(0){}
+
 };
 
 
