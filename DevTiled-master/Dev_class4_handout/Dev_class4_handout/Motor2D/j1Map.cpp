@@ -101,6 +101,10 @@ bool j1Map::Load(const char* file_name)
 	// TODO 4: Create and call a private function to load a tileset
 	// remember to support more any number of tilesets!
 
+	for (pugi::xml_node nTMP = map_file.child("map").child("tileset"); nTMP; nTMP = )
+
+	map.tiles.add()
+
 	map.tiles.firstGid = map_file.child("map").child("tileset").attribute("firstgid").as_int();
 	map.tiles.margin = map_file.child("map").child("tileset").attribute("margin").as_int();
 	map.tiles.spacing = map_file.child("map").child("tileset").attribute("spacing").as_int();

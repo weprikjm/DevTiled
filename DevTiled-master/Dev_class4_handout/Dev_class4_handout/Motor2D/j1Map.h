@@ -34,34 +34,6 @@ struct tileOffset
 	tileOffset() :x(0), y(0){}
 };
 
-
-struct MapNode
-{
-	int width;
-	int height;
-	int tileWidth;
-	int tileHeigth;
-	int nextObjectId;
-
-	
-
-	tileOffset Offset;
-	renderOrder render;
-	orientation orient;
-
-	TileSet tiles;
-	/*
-	MapNode() : width(0), height(0), tileWidth(0), tileHeigth(0), nextObjectId(0), 
-				render(RIGHTDOWN), orient(ORTHOGONAL)
-	{
-	
-		Offset.x = 0;
-		Offset.y = 0;
-	}
-	*/
-};
-
-
 struct TileSet
 {
 	int firstGid;
@@ -72,9 +44,38 @@ struct TileSet
 
 	p2DynArray<int> tileGrid;
 
-	//TileSet() : firstGid(0), tileWidth(0), tileHeight(0), spacing(0), margin(0){}
+	TileSet() : firstGid(0), tileWidth(0), tileHeight(0), spacing(0), margin(0){}
 
 };
+
+
+struct MapNode
+{
+	int width;
+	int height;
+	int tileWidth;
+	int tileHeigth;
+	int nextObjectId;
+
+
+	tileOffset Offset;
+	renderOrder render;
+	orientation orient;
+
+	p2List<TileSet*> tiles;
+	
+	MapNode() : width(0), height(0), tileWidth(0), tileHeigth(0), nextObjectId(0), 
+				render(RIGHTDOWN), orient(ORTHOGONAL)
+	{
+	
+		Offset.x = 0;
+		Offset.y = 0;
+	}
+	
+};
+
+
+
 
 
 // ----------------------------------------------------
