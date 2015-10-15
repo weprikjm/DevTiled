@@ -12,6 +12,14 @@
 
 // TODO 1: Create a struct needed to hold the information to Map node
 
+struct mapLayer
+{
+	int width;
+	int height;
+	p2DynArray<int> tileGuideline;//What tile goes where
+};
+
+
 enum orientation 
 {
 	ORTHOGONAL,
@@ -43,7 +51,7 @@ struct TileSet
 	int margin;
 
 	p2DynArray<int> tileGrid;
-
+	
 	TileSet() : firstGid(0), tileWidth(0), tileHeight(0), spacing(0), margin(0){}
 
 };
@@ -56,16 +64,18 @@ struct MapNode
 	int tileWidth;
 	int tileHeigth;
 	int nextObjectId;
-
+	int numTileSets;
+	int	numLayers;
 
 	tileOffset Offset;
 	renderOrder render;
 	orientation orient;
 
 	p2List<TileSet*> tiles;
-	
+	p2List<mapLayer*> layers;
+
 	MapNode() : width(0), height(0), tileWidth(0), tileHeigth(0), nextObjectId(0), 
-				render(RIGHTDOWN), orient(ORTHOGONAL)
+		render(RIGHTDOWN), orient(ORTHOGONAL), numTileSets(0)
 	{
 	
 		Offset.x = 0;
@@ -99,8 +109,20 @@ public:
 
 	// Load new map
 	bool Load(const char* path);
+	
+	MapNode GetMapNode();
+
+	SDL_Rect GetTileRect(int id);
+
+	uint Get(int x, int y);
 
 private:
+	//Loads the data for the map configuration
+	int LoadMapInfo();
+	bool loadTileSet(int nTileSets);
+	SDL_Texture* LoadRootTileGraphics(SDL_Texture*);
+	bool LoadLayer(int);
+	
 
 public:
 
@@ -108,11 +130,12 @@ public:
 	MapNode Level1;
 
 private:
-
+	
 	pugi::xml_document	map_file;
 	p2SString			folder;
 	bool				map_loaded;
 	MapNode				map;
+
 };
 
 #endif // __j1MAP_H__
