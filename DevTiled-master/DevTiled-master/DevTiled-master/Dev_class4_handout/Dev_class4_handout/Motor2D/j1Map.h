@@ -17,6 +17,8 @@ struct mapLayer
 	int width;
 	int height;
 	p2DynArray<int> tileGuideline;//What tile goes where
+
+
 };
 
 

@@ -62,8 +62,7 @@ void j1Map::Draw()
 		{
 			for (int k = 0; k < map.width ; k++)
 			{
-				
-				App->render->Blit(gameArtTiles, k*map.tileWidth, j*map.tileHeigth, &GetTileRect(0));
+				App->render->Blit(gameArtTiles, k*map.tileWidth, j*map.tileHeigth, &GetTileRect(Get(k,j)));
 			}
 		}
 	
@@ -94,7 +93,8 @@ bool j1Map::CleanUp()
 		RELEASE(itemTileSet->data);
 		itemTileSet = itemTileSet->next;
 	}
-
+	
+	/*
 	p2List_item<mapLayer*>* itemLayer;
 	itemLayer = map.layers.start;
 
@@ -103,11 +103,12 @@ bool j1Map::CleanUp()
 		RELEASE(itemLayer->data);
 		itemLayer = itemLayer->next;
 	}
+	*/
 
-	map.tiles.clear();
+	//map.tiles.clear();
 	// Remove all tilesets
 
-	map_file.reset();
+	//map_file.reset();
 
 	return true;
 }
@@ -259,9 +260,6 @@ bool j1Map::LoadLayer(int nLayers)
 			LOG("%d", p);
 		}
 
-
-
-
 	}
 
 	return ret;
@@ -278,36 +276,30 @@ MapNode j1Map::GetMapNode()
 
 SDL_Rect j1Map::GetTileRect(int id)
 {
+	int relative_id = id - map.tiles.At(0)->data->firstGid;
 	p2List_item<TileSet*>* tile = map.tiles.At(0);
-	const int* tileId = &tile->data->tileGrid[0];
+	
 
-	SDL_Rect* positionSprite = new SDL_Rect;
-	positionSprite->h = App->map->GetMapNode().height;
-	positionSprite->w = App->map->GetMapNode().width;
+	SDL_Rect positionSprite;
+	positionSprite.h = App->map->GetMapNode().height;
+	positionSprite.w = App->map->GetMapNode().width;
+	int margin = App->map->map.tiles.At(0)->data->margin;
+	int spacing = App->map->map.tiles.At(0)->data->spacing;
+	int num_tiles_width = App->map->map.tiles.At(0)->data->tileWidth;
+	int num_tiles_heigth = App->map->map.tiles.At(0)->data->tileHeight;
 
 
-	positionSprite->y = (id / positionSprite->h + id % positionSprite->h)*App->map->GetMapNode().tileHeigth;
-	positionSprite->x = (id / positionSprite->w + id % positionSprite->w)*App->map->GetMapNode().tileWidth;
+	positionSprite.x = margin + ((positionSprite.w + spacing) * (relative_id % num_tiles_width));
+	positionSprite.y = margin + ((positionSprite.h + spacing) * (relative_id / num_tiles_width));
 
 
 
-	return *positionSprite;
+	return positionSprite;
 }
 
 uint j1Map::Get(int x, int y)
 {
-	uint* position;
+	int width = App->map->map.layers.At(0)->data->width;
 
-	x /= App->map->GetMapNode().tileWidth;
-	y /= App->map->GetMapNode().tileHeigth;
-
-	*position = sqrt(pow(x, 2) + pow(y, 2));
-
-	
-
-	*position = (uint)App->map->GetMapNode().layers.At(0).data->tileGuideline[*position];
-		
-
-	return *position;
-
+	return (uint)App->map->map.layers.At(0)->data->tileGuideline.At((y*width) + x);
 }
