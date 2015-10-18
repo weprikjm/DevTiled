@@ -17,8 +17,6 @@ struct mapLayer
 	int width;
 	int height;
 	p2DynArray<int> tileGuideline;//What tile goes where
-
-
 };
 
 
@@ -51,6 +49,8 @@ struct TileSet
 	int tileHeight;
 	int spacing;
 	int margin;
+	int widthInTiles;
+	int heightInTiles;
 
 	p2DynArray<int> tileGrid;
 	
@@ -68,6 +68,8 @@ struct MapNode
 	int nextObjectId;
 	int numTileSets;
 	int	numLayers;
+	int widthPx;
+	int heightPx;
 
 	tileOffset Offset;
 	renderOrder render;
@@ -112,7 +114,7 @@ public:
 	// Load new map
 	bool Load(const char* path);
 	
-	MapNode GetMapNode();
+	MapNode* GetMapNode();
 
 	SDL_Rect GetTileRect(int id);
 
@@ -137,6 +139,7 @@ private:
 	p2SString			folder;
 	bool				map_loaded;
 	MapNode				map;
+	SDL_Texture* gameArtTiles;
 
 };
 

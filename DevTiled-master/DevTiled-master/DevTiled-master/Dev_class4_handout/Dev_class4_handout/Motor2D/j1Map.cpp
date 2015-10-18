@@ -10,6 +10,8 @@
 j1Map::j1Map() : j1Module(), map_loaded(false)
 {
 	name.create("map");
+
+	gameArtTiles = NULL;
 }
 
 // Destructor
@@ -41,19 +43,8 @@ void j1Map::Draw()
 	
 	
 	
-	SDL_Texture* gameArtTiles = NULL;
 	gameArtTiles = LoadRootTileGraphics(gameArtTiles);
-
 	
-
-	for (int i = 0; i < map.numTileSets; i++)
-	{ 
-		p2List_item<TileSet*>* tmpTileSet = map.tiles.At(i);
-		for (int i = 0; i < map.tiles.count();i++)
-		{ 
-			App->render->Blit(gameArtTiles, 0, 0);
-		}
-	}
 		
 
 	for (int i = 0; i < map.numLayers; i++)
@@ -124,7 +115,7 @@ bool j1Map::Load(const char* file_name)
 	int size = App->fs->Load(tmp.GetString(), &buf);
 	pugi::xml_parse_result result = map_file.load_buffer(buf, size);
 
-	RELEASE(buf);
+//	RELEASE(buf);
 
 	if(result == NULL)
 	{
@@ -159,9 +150,13 @@ int j1Map::LoadMapInfo()
 	//Set consistency later
 		map.height = map_file.child("map").attribute("height").as_int();
 		map.width = map_file.child("map").attribute("width").as_int();
-		map.tileWidth = map_file.child("map").attribute("tileWidth").as_int();
-		map.tileHeigth = map_file.child("map").attribute("tileHeight").as_int();
+		map.tileWidth = map_file.child("map").attribute("tilewidth").as_int();
+		map.tileHeigth = map_file.child("map").attribute("tileheight").as_int();
 		map.nextObjectId = map_file.child("map").attribute("nextObjectId").as_int();
+		map.widthPx = map_file.child("map").child("tileset").child("image").attribute("width").as_int();
+		map.heightPx = map_file.child("map").child("tileset").child("image").attribute("height").as_int();
+		
+		
 
 		if (map_file.child("map").attribute("orientation").as_string() == "ORTHOGONAL")
 		{
@@ -185,36 +180,38 @@ bool j1Map::loadTileSet(int nTileSets)
 	bool ret = false;
 
 
+
+
 	for (int i = 0; i < nTileSets; i++)
 	{
 	
 	
 		map.tiles.add(new TileSet);
 
-		p2List_item<TileSet*>* tileSetConfig = map.tiles.At(i);
-
-		tileSetConfig->data->firstGid = map_file.child("map").child("tileset").attribute("firstgid").as_int();
-		tileSetConfig->data->margin = map_file.child("map").child("tileset").attribute("margin").as_int();
-		tileSetConfig->data->spacing = map_file.child("map").child("tileset").attribute("spacing").as_int();
-		tileSetConfig->data->tileHeight = map_file.child("map").child("tileset").attribute("tileheight").as_int();
-		tileSetConfig->data->tileWidth = map_file.child("map").child("tileset").attribute("tilewidth").as_int();
+		map.tiles.At(0)->data->firstGid = map_file.child("map").child("tileset").attribute("firstgid").as_int();
+		map.tiles.At(0)->data->margin = map_file.child("map").child("tileset").attribute("margin").as_int();
+		map.tiles.At(0)->data->spacing = map_file.child("map").child("tileset").attribute("spacing").as_int();
+		map.tiles.At(0)->data->tileHeight = map_file.child("map").child("tileset").attribute("tileheight").as_int();
+		map.tiles.At(0)->data->tileWidth = map_file.child("map").child("tileset").attribute("tilewidth").as_int();
 
 
 
 		for (pugi::xml_node nTMP = map_file.child("map").child("tileset").child("tile"); nTMP; nTMP = nTMP.next_sibling())
 		{
-			tileSetConfig->data->tileGrid.PushBack(nTMP.attribute("id").as_int());
+			map.tiles.At(0)->data->tileGrid.PushBack(nTMP.attribute("id").as_int());
 		}
 
 
-		for (int i = 0; i < tileSetConfig->data->tileGrid.Count(); i++)
+		for (int i = 0; i < map.tiles.At(0)->data->tileGrid.Count(); i++)
 		{
-			int p = *tileSetConfig->data->tileGrid.At(i);
+			int p = *map.tiles.At(0)->data->tileGrid.At(i);
 			LOG("%d", p);
 		}
 
+		map.tiles.At(0)->data->widthInTiles = map.widthPx / map.tileWidth;
+		map.tiles.At(0)->data->heightInTiles = map.heightPx / map.tileHeigth;
 
-		
+		ret = true;
 
 	}
 
@@ -240,26 +237,24 @@ bool j1Map::LoadLayer(int nLayers)
 
 		map.layers.add(new mapLayer);
 
-		p2List_item<mapLayer*>* mapLayerConfig = map.layers.At(i);
-
-		mapLayerConfig->data->height = map_file.child("map").child("layer").attribute("height").as_int();
-		mapLayerConfig->data->width = map_file.child("map").child("layer").attribute("width").as_int();
+		map.layers.At(0)->data->height = map_file.child("map").child("layer").attribute("height").as_int();
+		map.layers.At(0)->data->width = map_file.child("map").child("layer").attribute("width").as_int();
 		
 		//child("data").child("tile").attribute("gid").as_int()
 
 
 		for (pugi::xml_node nTMP = map_file.child("map").child("layer").child("data").child("tile"); nTMP; nTMP = nTMP.next_sibling())
 		{
-			mapLayerConfig->data->tileGuideline.PushBack(nTMP.attribute("gid").as_int());
+			map.layers.At(0)->data->tileGuideline.PushBack(nTMP.attribute("gid").as_int());
 		}
 
 
-		for (int i = 0; i < mapLayerConfig->data->tileGuideline.Count(); i++)
+		for (int i = 0; i < map.layers.At(0)->data->tileGuideline.Count(); i++)
 		{
-			int p = *mapLayerConfig->data->tileGuideline.At(i);
+			int p = *map.layers.At(0)->data->tileGuideline.At(i);
 			LOG("%d", p);
 		}
-
+		ret = true;
 	}
 
 	return ret;
@@ -267,9 +262,9 @@ bool j1Map::LoadLayer(int nLayers)
 
 }
 
-MapNode j1Map::GetMapNode()
+MapNode* j1Map::GetMapNode()
 {
-	return map;
+	return &map;
 }
 
 
@@ -278,19 +273,19 @@ SDL_Rect j1Map::GetTileRect(int id)
 {
 	int relative_id = id - map.tiles.At(0)->data->firstGid;
 	p2List_item<TileSet*>* tile = map.tiles.At(0);
-	
+	//LOG("%d",App->map->GetMapNode().tiles.start->data->margin);
 
 	SDL_Rect positionSprite;
-	positionSprite.h = App->map->GetMapNode().height;
-	positionSprite.w = App->map->GetMapNode().width;
-	int margin = App->map->map.tiles.At(0)->data->margin;
-	int spacing = App->map->map.tiles.At(0)->data->spacing;
-	int num_tiles_width = App->map->map.tiles.At(0)->data->tileWidth;
-	int num_tiles_heigth = App->map->map.tiles.At(0)->data->tileHeight;
+	positionSprite.h = App->map->GetMapNode()->tileHeigth;
+	positionSprite.w = App->map->GetMapNode()->tileWidth;
+	int marg = App->map->GetMapNode()->tiles.start->data->margin;
+	int spac = App->map->GetMapNode()->tiles.start->data->spacing;
+	int num_tiles_width = map.tiles.At(0)->data->widthInTiles;
+	int num_tiles_heigth = map.tiles.At(0)->data->heightInTiles;
 
 
-	positionSprite.x = margin + ((positionSprite.w + spacing) * (relative_id % num_tiles_width));
-	positionSprite.y = margin + ((positionSprite.h + spacing) * (relative_id / num_tiles_width));
+	positionSprite.x = marg + ((positionSprite.w + spac) * (relative_id % num_tiles_width));
+	positionSprite.y = marg + ((positionSprite.h + spac) * (relative_id / num_tiles_width));
 
 
 
@@ -299,7 +294,9 @@ SDL_Rect j1Map::GetTileRect(int id)
 
 uint j1Map::Get(int x, int y)
 {
-	int width = App->map->map.layers.At(0)->data->width;
+	int width = GetMapNode()->layers.At(0)->data->width;
+	LOG("%d", *GetMapNode()->layers.At(0)->data->tileGuideline.At((y*width) + x));
+	int i = *GetMapNode()->layers.At(0)->data->tileGuideline.At((y*width) + x);
 
-	return (uint)App->map->map.layers.At(0)->data->tileGuideline.At((y*width) + x);
+	return i;
 }
